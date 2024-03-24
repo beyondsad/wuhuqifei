@@ -1,0 +1,74 @@
+//代码有点问题，输出时仿佛缺了某位置的
+//据说如果你给无限只母牛和无限台巨型便携式电脑(有非常大的键盘),那么母牛们会制造出世上最棒的回文。你的工作就是去这些牛制造的奇观(最棒的回文)。
+//在寻找回文时不用理睬那些标点符号、空格(但应该保留下来以便做为答案输出),只用考虑字母'A'-'Z'和'a'-'z'。要你寻找的最长的回文的文章是一个不超过20,000个字符的字符串。
+//我们将保证最长的回文不会超过2,000个字符(在除去标点符号、空格之前)。
+//输出的第一行应该包括找到的最长的回文的长度。
+//下一个行或几行应该包括这个回文的原文(没有除去标点符号、空格), 把这个回文输出到一行或多行(如果回文中包括换行符)。
+//如果有多个回文长度都等于最大值,输出那个前出现的。
+//输入：Confucius say: Madam, I'm Adam.
+//输出：11
+//      Madam, I'm Adam
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cctype>
+using namespace std;
+
+string cleanString(const string& s) {
+    string cleaned;
+    for (int i = 0; i < s.length(); ++i) {
+        char c = s[i];
+        if (isalpha(c)) {
+            cleaned += tolower(c);
+        }
+    }
+    return cleaned;
+}
+
+pair<int, string> longestPalindrome(const string& s) {
+    string cleanedStr = cleanString(s);
+    int n = cleanedStr.length();
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+    int maxLen = 0;
+    int start = 0;
+
+    for (int len = 1; len <= n; ++len) {
+        for (int i = 0; i + len - 1 < n; ++i) {
+            int j = i + len - 1;
+            if (cleanedStr[i] == cleanedStr[j]) {
+                if (len == 1 || len == 2 || dp[i + 1][j - 1] == len - 2) {
+                    dp[i][j] = len;
+                    if (len > maxLen) {
+                        maxLen = len;
+                        start = i;
+                    }
+                }
+            }
+        }
+    }
+
+    // 定位回文子串在原始字符串中的位置
+    int originalStart = 0;
+    while (isspace(s[originalStart])) {
+        originalStart++;
+    }
+    for (int i = 0; i < start; ++i) {
+        if (!isspace(s[i])) {
+            originalStart++;
+        }
+    }
+
+    return {maxLen, s.substr(originalStart, maxLen)};
+}
+
+int main() {
+    string input;
+    getline(cin, input);
+
+    pair<int, string> result = longestPalindrome(input);
+
+    cout << result.first << endl;
+    cout << result.second << endl;
+
+    return 0;
+}
